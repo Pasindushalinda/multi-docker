@@ -1,0 +1,24 @@
+sudo: required
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - docker build -t pasindusha/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true pasindusha/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t pasindusha/multi-client ./client
+  - docker build -t pasindusha/multi-nginx ./nginx
+  - docker build -t pasindusha/multi-server ./server
+  - docker build -t pasindusha/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push pasindusha/multi-client
+  - docker push pasindusha/multi-nginx
+  - docker push pasindusha/multi-server
+  - docker push pasindusha/multi-worker
