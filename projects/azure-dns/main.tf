@@ -1,1 +1,1 @@
-
+azure dns working
